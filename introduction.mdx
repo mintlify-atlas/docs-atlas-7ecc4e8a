@@ -1,0 +1,74 @@
+---
+title: "Discord Rawrbot: Your Community Bot"
+sidebarTitle: "Introduction"
+description: "Discord Rawrbot is a feature-rich Discord bot built with discord.py, offering slash commands for moderation, music, translation, and server utilities."
+---
+
+Discord Rawrbot is a community-focused Discord bot built with [discord.py](https://discordpy.readthedocs.io/) and its `app_commands` framework, meaning every user-facing interaction is a native Discord slash command. The bot supports both server installs and user installs — when added to a user account it continues to work in DMs and group DMs, giving your community a consistent experience no matter where they chat.
+
+## Architecture
+
+Rawrbot follows discord.py's **cog-based architecture**, splitting commands and event listeners into focused, independently loaded modules. At startup, `main.py` registers the following cogs via `client.load_extension()`:
+
+| Cog | Module | Purpose |
+|---|---|---|
+| General | `cogs.general` | Core utility commands — ping, greetings, invite, sync |
+| Moderation | `cogs.moderation` | Server moderation tools |
+| Music | `cogs.music` | Music playback and Spotify integration |
+| Utility | `cogs.utility` | Translation, upload, and miscellaneous helpers |
+
+The bot is initialised with `command_prefix="!"`, but this prefix is intentionally unused — all commands are registered and invoked as Discord slash commands through `app_commands`. The `Message Content` privileged intent is enabled so the bot can read message content where needed.
+
+## Available Commands Overview
+
+Each cog exposes its own set of slash commands. Browse the dedicated reference pages below for full parameter descriptions and usage examples.
+
+<CardGroup cols={2}>
+  <Card title="General Commands" icon="hand-wave" href="/commands/general">
+    Ping, greetings, bot invite link, and owner-only command sync. These commands work in servers, DMs, and group DMs.
+  </Card>
+  <Card title="Moderation Commands" icon="shield-halved" href="/commands/moderation">
+    Server moderation utilities including member management tools for keeping your community safe.
+  </Card>
+  <Card title="Music Commands" icon="music" href="/commands/music">
+    Music playback powered by yt-dlp, Spotify search via the Spotify Web API, and song.link cross-platform sharing.
+  </Card>
+  <Card title="Utility Commands" icon="wrench" href="/commands/utility">
+    Translation powered by the `translate` library, file uploads via catbox.moe, and other general-purpose helpers.
+  </Card>
+</CardGroup>
+
+## User Install Support
+
+Many of Rawrbot's commands are decorated with `@app_commands.allowed_installs(True, True)`, which means they are available when the bot is installed to an **individual user account** — not just a server. Combined with `@app_commands.allowed_contexts(True, True, True)`, these commands function in:
+
+- **Guild channels** — any server the bot or user has access to
+- **Bot DMs** — private messages directly with the bot
+- **Group DMs** — multi-user direct message conversations
+
+This makes Rawrbot genuinely portable. Commands like `/ping`, `/hello`, `/pop`, and `/invite` follow you everywhere you use Discord without requiring the bot to be a member of any particular server.
+
+## Requirements
+
+Rawrbot's Python dependencies are minimal. Install them with `pip install -r requirements.txt`:
+
+- **`discord.py`** — the core Discord API library providing `commands.Bot`, `app_commands`, and the cog system
+- **`aiohttp`** — async HTTP client used for external API calls
+- **`translate`** — Python translation library powering the `/translate` command
+
+**Optional external tools** (must be available on your system `PATH`):
+
+- **`yt-dlp`** — required for music playback and the `/upload` command's download functionality
+- **`ffprobe`** — required alongside yt-dlp for audio stream probing
+
+**External API integrations:**
+
+- **Spotify Web API** — used by `/searchspotify`; requires a Client ID and Client Secret in `config.json`
+- **song.link API** — used to generate cross-platform music sharing links
+- **catbox.moe** — used by `/upload` to host and share files
+
+<Note>
+  Rawrbot is publicly hosted and ready to add to your server. Use the invite link below to add it without any local setup:
+
+  [**Add Rawrbot to your server →**](https://discord.com/oauth2/authorize?client_id=1118629362368008283&permissions=2147486720&scope=bot&permissions=2147486720&scope=messages.read%20bot)
+</Note>

@@ -1,0 +1,118 @@
+---
+title: "Self-Host Discord Rawrbot on Your Machine"
+sidebarTitle: "Self-Hosting"
+description: "Run your own instance of Discord Rawrbot. Covers prerequisites, cloning, dependency installation, configuration, and running the bot process."
+---
+
+Self-hosting Rawrbot lets you run your own instance with your own bot token, giving you full control over the bot and its configuration. You'll need Python 3.10 or newer, a Discord bot application created through the Discord Developer Portal, and optionally Spotify API credentials if you want to use the Spotify-related commands.
+
+## Prerequisites
+
+Before you start, make sure you have the following:
+
+- **Python 3.10 or newer** — the codebase uses f-strings and type hint syntax that require at least Python 3.10. Some expressions in `cogs/moderation.py` (such as `f"{"" if ... else "s"}"`) use nested f-string syntax that requires Python 3.12 or newer.
+- **A Discord account** with access to the [Discord Developer Portal](https://discord.com/developers/applications), where you will create a bot application and obtain a token.
+- **Git** — for cloning the repository from GitHub.
+- **`yt-dlp` and `ffprobe`** — only required if you intend to use the `/upload` command. These are not listed in `requirements.txt` and must be installed separately on your system.
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the project from GitHub and navigate into the project directory:
+
+    ```bash
+    git clone https://github.com/Flyingbacen/Discord-rawrbot.git
+    cd Discord-rawrbot
+    ```
+  </Step>
+  <Step title="Install Python dependencies">
+    Install the required Python packages using pip:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+    This installs three packages as declared in `requirements.txt`:
+    - `aiohttp` — async HTTP client used for web requests
+    - `discord.py` — the Discord API wrapper the bot is built on
+    - `translate` — used by the `/translate` command
+  </Step>
+  <Step title="Create config.json">
+    Copy `config_EXAMPLE.json` to `config.json` in the project root and fill in your values:
+
+    ```json config.json
+    {
+      "token": "YOUR_BOT_TOKEN_HERE",
+      "spotify": {
+        "spotifyClientID": "YOUR_SPOTIFY_CLIENT_ID",
+        "spotifyClientSecret": "YOUR_SPOTIFY_CLIENT_SECRET"
+      },
+      "webhook": "YOUR_DISCORD_WEBHOOK_URL"
+    }
+    ```
+
+    - **`token`** — your Discord bot token from the Developer Portal (see the next section).
+    - **`spotify.spotifyClientID` / `spotifyClientSecret`** — credentials from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard). Required for `/searchspotify` and `/convertsonglink`.
+    - **`webhook`** — a Discord webhook URL used for internal logging. You can create one in any server channel via **Channel Settings → Integrations → Webhooks**.
+  </Step>
+  <Step title="Run the bot">
+    Start the bot process:
+
+    ```bash
+    python main.py
+    ```
+
+    When the bot is ready, you will see `Ready!` printed to the terminal. The bot will set its Discord status to **Idle** with activity **"Listening to your commands"**.
+  </Step>
+</Steps>
+
+## Bot Application Setup
+
+If you do not yet have a Discord bot application, follow these steps in the Developer Portal:
+
+<Steps>
+  <Step title="Create a new application">
+    Go to [https://discord.com/developers/applications](https://discord.com/developers/applications) and click **New Application**. Give it a name (e.g. "Rawrbot") and confirm.
+  </Step>
+  <Step title="Generate a bot token">
+    Navigate to the **Bot** tab in the left sidebar. Click **Reset Token**, confirm the action, and copy the token that appears. Paste it into the `"token"` field in your `config.json`. Keep this token secret — anyone with it can control your bot.
+  </Step>
+  <Step title="Enable the Message Content Intent">
+    Still on the **Bot** tab, scroll down to **Privileged Gateway Intents** and enable **Message Content Intent**. The bot's `main.py` sets `intents.message_content = True`, so Discord must have this enabled on the application side as well.
+  </Step>
+  <Step title="Generate an invite URL">
+    Go to **OAuth2 → URL Generator**. Under **Scopes**, select `bot`. Under **Bot Permissions**, enter or select the permissions that add up to `2147486720`. Copy the generated URL at the bottom of the page and use it to invite the bot to your server.
+  </Step>
+</Steps>
+
+## Keeping the Bot Running
+
+Running `python main.py` directly in a terminal works for development, but the bot process will stop when you close the terminal. For longer-running deployments, consider one of these approaches:
+
+- **`screen` or `tmux`** (Linux/macOS) — launch the bot inside a persistent terminal session that survives disconnects:
+  ```bash
+  screen -S rawrbot
+  python main.py
+  # Detach with Ctrl+A, D
+  ```
+- **`pm2`** — a Node.js-based process manager that works with Python processes and auto-restarts on crash:
+  ```bash
+  pm2 start main.py --interpreter python3 --name rawrbot
+  pm2 save
+  ```
+- **VPS or cloud VM** — running the bot on a remote machine (e.g. a DigitalOcean Droplet or AWS EC2 instance) keeps it online independently of your local machine.
+
+<Tip>
+  For a production-style Linux setup, consider creating a `systemd` service unit for the bot. A `systemd` service will start automatically on system boot and restart the process if it crashes, without requiring any manual intervention.
+</Tip>
+
+## Syncing Slash Commands
+
+After the bot starts for the first time, its slash commands may not appear in Discord immediately. The `/sync` command calls `tree.sync()` to push all registered application commands to Discord's API. This command is owner-only — it checks `interaction.user.id` against the `allowedUsers` list in `cogs/general.py`.
+
+<Warning>
+  The owner user ID (`717471432816459840`) is hardcoded in both `cogs/general.py` (in `bigDict["sync"]["extras"]["allowedUsers"]`) and `cogs/moderation.py` (in the `/timeout` command handler). If you are self-hosting, you **must** replace these IDs with your own Discord user ID before running the bot, otherwise you will not be able to use owner-only commands.
+</Warning>
+
+To find your Discord user ID, enable **Developer Mode** in Discord's settings (**Advanced → Developer Mode**), then right-click your username anywhere in Discord and select **Copy User ID**.

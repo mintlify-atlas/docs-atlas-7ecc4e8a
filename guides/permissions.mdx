@@ -1,0 +1,78 @@
+---
+title: "Bot Permissions and Command Access Control"
+sidebarTitle: "Permissions"
+description: "Understand what Discord permissions Rawrbot needs, which commands are owner-only, and how server vs user install affects command availability."
+---
+
+Rawrbot uses Discord's permission system in two complementary ways — the OAuth2 permissions granted when the bot is invited to a server, and per-command access restrictions enforced at runtime in the bot's code. Understanding both helps you configure the bot correctly and know which commands your members (and you) can run in any given context.
+
+## Required Discord Permissions
+
+The invite link requests the permission integer `2147486720`. This value is the bitwise sum of all the individual permissions the bot needs to function fully. The table below maps each included permission to the commands that rely on it:
+
+| Permission | Commands That Need It |
+|---|---|
+| Read Messages / View Channels | All commands — needed to receive interactions and log channel names |
+| Send Messages | All commands — needed to send responses to interactions |
+| Read Message History | `/random_image` — scans channel history to find image attachments |
+| Mute Members | `/mute` — server-mutes a member in a voice channel |
+| Deafen Members | `/deafen` — server-deafens a member in a voice channel |
+| Move Members | `/move_user`, `/move_voicechannel` — moves members between voice channels |
+| Manage Channels | `/move_voicechannel` (with `lock_channel=True`) — sets a permission overwrite on the source channel to prevent reconnection while the move is in progress |
+| Moderate Members | `/timeout` — applies a Discord timeout to a member |
+
+If any of these permissions are missing, the bot may fail silently or return a `discord.Forbidden` error when the relevant command is invoked.
+
+## Owner-Only Commands
+
+Some commands are restricted to specific Discord user IDs that are hardcoded directly in the source files. These restrictions are enforced at runtime — the bot checks `interaction.user.id` before executing the privileged action.
+
+- **`/sync`** — restricted to user IDs listed in `bigDict["sync"]["extras"]["allowedUsers"]` inside `cogs/general.py`. Users not in that list receive a "Missing perms" message, and the response is deleted after five seconds.
+- **`/timeout`** — the handler in `cogs/moderation.py` checks `interaction.user.id != 717471432816459840` at the top of the function and sends an error message to anyone who doesn't match.
+- **`/upload`** — checks `interaction.user.id` at runtime; users who are not the owner are redirected to use `/random_image` instead.
+
+<Warning>
+  The owner user ID (`717471432816459840`) is hardcoded in `cogs/general.py` and `cogs/moderation.py`. If you are self-hosting Rawrbot, you must update these values to your own Discord user ID before running the bot. See the [Self-Hosting](/guides/self-hosting) guide for instructions on finding your user ID.
+</Warning>
+
+## Command Contexts and Install Types
+
+Every slash command in Rawrbot is decorated with `@app_commands.allowed_contexts(...)` and `@app_commands.allowed_installs(...)` from discord.py's `app_commands` module. These decorators control exactly where and how a command can be invoked:
+
+- **`allowed_contexts(guilds, dms, group_dms)`** — three boolean arguments that determine whether the command can be used in guild channels, direct messages, and group DMs respectively.
+- **`allowed_installs(guild_install, user_install)`** — two boolean arguments that determine whether the command is available when the bot is installed as a server bot, as a user app, or both.
+
+The table below shows the effective availability for every command based on the decorators in the source:
+
+| Command | Guild (Server) | DMs | Group DMs | Install Type |
+|---|:---:|:---:|:---:|---|
+| `/ping` | ✓ | ✓ | ✓ | Server & User |
+| `/hello` | ✓ | ✓ | ✓ | Server & User |
+| `/invite` | ✓ | ✓ | ✓ | Server & User |
+| `/pop` | ✓ | ✓ | ✓ | Server & User |
+| `/sync` | ✗ | ✓ | ✗ | User only |
+| `/ban_list` | ✓ | ✗ | ✗ | Server only |
+| `/mute` | ✓ | ✗ | ✗ | Server only |
+| `/deafen` | ✓ | ✗ | ✗ | Server only |
+| `/timeout` | ✓ | ✗ | ✗ | Server only |
+| `/move_user` | ✓ | ✗ | ✗ | Server only |
+| `/move_voicechannel` | ✓ | ✓ | ✓ | Server only |
+| `/convertsonglink` | ✓ | ✓ | ✓ | Server & User |
+| `/searchspotify` | ✓ | ✓ | ✓ | Server & User |
+| `/translate` | ✓ | ✓ | ✓ | Server & User |
+| `/random_image` | ✓ | ✗ | ✗ | Server only |
+| `/upload` | ✓ | ✓ | ✓ | Server & User |
+
+Note that `/sync` is unique: it is available in DMs but restricted to user install only (`allowed_installs(False, True)`). This means it can only be invoked by a user who has installed the bot to their account — it is intentionally not exposed as a guild command to avoid accidental syncs from server members.
+
+## Ephemeral Responses
+
+Several moderation commands use `ephemeral=True` when deferring or sending follow-up messages. An ephemeral response is only visible to the user who invoked the command — no one else in the channel can see it. The following commands use ephemeral responses to keep moderation actions discreet:
+
+- `/mute` — the deferred response and all follow-up messages (including the timed unmute confirmation) are ephemeral.
+- `/deafen` — the deferred response and all follow-up messages (including the timed undeafen confirmation) are ephemeral.
+- `/timeout` — both the deferred response and the outcome message are ephemeral.
+- `/move_user` — all follow-up messages, including the "not in a voice channel" error, are ephemeral.
+- `/move_voicechannel` — the deferred response and all status messages are ephemeral.
+
+This means moderators can invoke these commands in public channels without broadcasting the action or any error messages to the rest of the server.

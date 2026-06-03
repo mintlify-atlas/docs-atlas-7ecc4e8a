@@ -1,0 +1,127 @@
+---
+title: "Utility Commands: Translate, Images, and Uploads"
+sidebarTitle: "Utility"
+description: "Utility slash commands in Rawrbot: translate text across 25+ languages, find random images in a server, and upload videos to catbox.moe."
+---
+
+Rawrbot's utility commands handle a range of practical tasks — translating text between languages, digging up a random image from a server's history, and downloading and re-hosting videos from sites like YouTube, TikTok, and more. These commands are independent of each other and can be used in most contexts where Rawrbot is available.
+
+---
+
+## `/translate`
+
+**Description:** "Translate text from one language to another"
+
+Translates a piece of text between any two of the 25 supported languages using the `translate` Python library. Both the source and target language fields have autocomplete enabled in Discord, so you can start typing a language name and select it from the dropdown rather than entering a language code manually. The result can optionally be sent as an ephemeral reply visible only to you.
+
+| Property | Value |
+|---|---|
+| Contexts | Guilds, DMs, Group DMs |
+| Installs | Server install, User install |
+
+**Parameters:**
+
+<ParamField path="text" type="string" required>
+  The text you want to translate.
+</ParamField>
+
+<ParamField path="from_language" type="string (autocomplete)" required>
+  The language of the input text. Autocomplete is enabled — start typing the language name in Discord to filter choices. Supported languages and their codes:
+
+  `English (en)` · `Spanish (es)` · `German (de)` · `Russian (ru)` · `Japanese (ja)` · `Chinese (zh)` · `French (fr)` · `Italian (it)` · `Korean (ko)` · `Portuguese (pt)` · `Dutch (nl)` · `Danish (da)` · `Finnish (fi)` · `Greek (el)` · `Arabic (ar)` · `Hebrew (he)` · `Hindi (hi)` · `Indonesian (id)` · `Latvian (lv)` · `Lithuanian (lt)` · `Malay (ms)` · `Swahili (sw)` · `Tamil (ta)` · `Telugu (te)` · `Urdu (ur)`
+</ParamField>
+
+<ParamField path="to_language" type="string (autocomplete)" required>
+  The language to translate the text into. Same autocomplete choices as `from_language`.
+</ParamField>
+
+<ParamField path="ephemeral" type="bool" default="False">
+  When set to `True`, the translation result is only visible to you. Useful if you want to quietly translate something without posting the result publicly in a channel.
+</ParamField>
+
+**Example usage:**
+
+```
+/translate text:Bonjour tout le monde from_language:French to_language:English
+```
+
+**Example response:**
+
+```
+Hello everyone
+```
+
+---
+
+## `/random_image`
+
+**Description:** "finds and selects a random image. If `channel` is not set, then searches the server"
+
+Scans message history for image attachments and picks one at random. If no channel is specified, Rawrbot searches every text channel in the server it has permission to read, working through each channel's history in batches of 100 messages with a 10-second timeout per channel. When a specific channel is provided, the timeout is extended to 20 seconds. The response includes a "Jump to message" link so you can easily navigate to the original context.
+
+<Note>
+  Searching across an entire server can take several seconds or more depending on how many channels exist and how large their message histories are. If Rawrbot lacks read permission in a channel, that channel is silently skipped.
+</Note>
+
+| Property | Value |
+|---|---|
+| Contexts | Server only |
+| Installs | Server install |
+
+**Parameters:**
+
+<ParamField path="channel" type="TextChannel">
+  Optional. A specific text channel to search for images. If omitted, Rawrbot searches all accessible text channels in the current server.
+</ParamField>
+
+**Example response:**
+
+```
+[Jump to message](https://discord.com/channels/...) [.](https://cdn.discordapp.com/attachments/...)
+```
+
+The second link in the response is the direct URL to the image attachment, rendered as an inline preview by Discord.
+
+---
+
+## `/upload`
+
+**Description:** "Downloads a video, then uploads it to catbox.moe (max 200MB)"
+
+Downloads a video from any [yt-dlp](https://github.com/yt-dlp/yt-dlp)-supported URL — YouTube, TikTok, Twitter/X, Reddit, and hundreds of other sites — converts it to MP4, and either uploads it directly to Discord or hosts it on [catbox.moe](https://catbox.moe) depending on the file size. Files under 10 MB are sent directly as a Discord attachment (or through a webhook if the command is used in a specific channel). Files between 10 MB and 200 MB are uploaded to catbox.moe and the resulting URL is returned.
+
+<Warning>
+  This command is currently **restricted to the bot owner** (hardcoded user ID). Any other user who attempts to run `/upload` will receive the message:
+
+  > "You do not have permission to use this command. Wait for some other time. Try `/random_image` instead"
+
+  The command also requires `yt-dlp` and `ffprobe` to be installed and accessible on the host system.
+</Warning>
+
+| Property | Value |
+|---|---|
+| Contexts | Guilds, DMs, Group DMs |
+| Installs | Server install, User install |
+
+**Parameters:**
+
+<ParamField path="link" type="string" required>
+  The URL of the video to download. Any site supported by `yt-dlp` is accepted. The bot owner may also provide a local file path (e.g. starting with `C:` or `D:`) to upload a file already on the host machine.
+</ParamField>
+
+<ParamField path="optional_message" type="string">
+  An optional text message to include alongside the uploaded file or catbox.moe link in the final response.
+</ParamField>
+
+**Upload size rules:**
+
+| File size | Behaviour |
+|---|---|
+| Over 200 MB | Rejected. Rawrbot responds with an error asking you to select a smaller file. |
+| 10 MB – 200 MB | Uploaded to [catbox.moe](https://catbox.moe). The catbox URL is sent in the response. |
+| Under 10 MB | Uploaded directly as a Discord file attachment. If the command is used in the designated webhook channel, it is posted via webhook with your display name and avatar. |
+
+**Error cases:**
+- **Invalid or unresolvable URL:** Rawrbot responds with `"Invalid link"`.
+- **Download failure:** If `yt-dlp` cannot extract a video URL, Rawrbot responds with `"Failed to get video URL."`.
+- **File not found after download:** An unexpected error during conversion results in `"An error occurred: Could not find the file"`.

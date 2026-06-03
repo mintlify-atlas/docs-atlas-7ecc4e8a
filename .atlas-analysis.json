@@ -1,0 +1,72 @@
+{
+  "projectType": "general",
+  "projectName": "Discord Rawrbot",
+  "projectDescription": "A feature-rich Discord bot built with discord.py, offering general, moderation, music link conversion, and utility slash commands for community servers.",
+  "theme": "luma",
+  "primaryColor": "#5c64f4",
+  "lightColor": "#acb4fc",
+  "darkColor": "#ffffff",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "configuration"
+            ]
+          },
+          {
+            "group": "Commands",
+            "pages": [
+              "commands/general",
+              "commands/moderation",
+              "commands/music",
+              "commands/utility"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/adding-to-server",
+              "guides/self-hosting",
+              "guides/permissions"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Slash commands via discord.py app_commands",
+    "Moderation tools: mute, deafen, timeout, ban list, voice channel management",
+    "Music link conversion across 20+ streaming platforms via song.link API",
+    "Spotify search with cross-platform song link resolution",
+    "Text translation across 25+ languages",
+    "Random image picker from server channels",
+    "Video download and upload to catbox.moe via yt-dlp",
+    "User-installed bot support (works in DMs and group DMs)",
+    "Cog-based extensible architecture"
+  ],
+  "publicApiSurface": [
+    "/ping — check bot latency",
+    "/hello — greeting command",
+    "/invite — get bot invite link",
+    "/pop — fun easter egg command",
+    "/sync — sync slash commands (owner only)",
+    "/ban_list — list banned users in the server",
+    "/mute — mute/unmute a user in a voice channel (with optional timer)",
+    "/deafen — deafen/undeafen a user in a voice channel (with optional timer)",
+    "/timeout — timeout a user for a specified duration",
+    "/move_user — move a user to a different voice channel",
+    "/move_voicechannel — move all users from one voice channel to another",
+    "/convertsonglink — convert a song link between streaming platforms",
+    "/searchspotify — search Spotify and get a link for any platform",
+    "/translate — translate text between languages",
+    "/random_image — find a random image from server channels",
+    "/upload — download a video and upload it to catbox.moe"
+  ]
+}

@@ -1,0 +1,67 @@
+---
+title: "Add Discord Rawrbot to Your Server"
+sidebarTitle: "Adding to Server"
+description: "Invite Discord Rawrbot to your Discord server or install it to your user account for DM and cross-server access."
+---
+
+Discord Rawrbot supports two install modes — server install (classic bot) and user install. Server install adds the bot to a specific guild, making it available to all members of that server. User install lets you add the bot to your own Discord account so that supported commands work anywhere on Discord, including DMs and group chats, without the bot needing to be a member of the server.
+
+## Server Install
+
+Server install is the traditional method of adding a bot to Discord. The bot joins your guild and its slash commands become available to all members. You must have the **Manage Server** permission on the target server to complete this flow.
+
+<Steps>
+  <Step title="Open the invite link">
+    Click the invite link below (or run `/invite` from the bot in any context where you already have access):
+
+    [https://discord.com/oauth2/authorize?client_id=1118629362368008283&permissions=2147486720&scope=bot&permissions=2147486720&scope=messages.read%20bot](https://discord.com/oauth2/authorize?client_id=1118629362368008283&permissions=2147486720&scope=bot&permissions=2147486720&scope=messages.read%20bot)
+  </Step>
+  <Step title="Select your server">
+    In the authorization dialog, choose the server you want to add the bot to from the dropdown menu.
+  </Step>
+  <Step title="Review and authorize permissions">
+    Discord will display the list of permissions the bot is requesting. Review them and click **Authorize** to proceed.
+  </Step>
+  <Step title="Complete the CAPTCHA">
+    If Discord prompts you with a CAPTCHA, complete it to finish the authorization.
+  </Step>
+  <Step title="Verify the bot is online">
+    Head to your server and run `/ping`. The bot will respond with its current latency, confirming it is online and ready.
+  </Step>
+</Steps>
+
+<Note>
+  The permissions value `2147486720` in the invite URL grants the bot the minimum set of permissions needed to operate all of its features. See the [Permissions](/guides/permissions) guide for a full breakdown of what each permission is used for.
+</Note>
+
+## User Install
+
+User install lets individual users add Rawrbot directly to their Discord account rather than to a specific server. Once installed this way, commands that support user install work in any Discord context — DMs, group DMs, and servers where the bot has not been added as a server bot.
+
+<Note>
+  Not all commands support user install. Moderation commands such as `/mute`, `/deafen`, `/timeout`, `/ban_list`, `/move_user`, and `/move_voicechannel` only work in servers where the bot is installed as a server bot, because they require guild members and voice channel objects to function. Commands like `/ping`, `/translate`, `/convertsonglink`, `/hello`, `/invite`, and `/pop` work fully with user install.
+</Note>
+
+<Steps>
+  <Step title="Open the invite link">
+    Visit the same invite URL:
+
+    [https://discord.com/oauth2/authorize?client_id=1118629362368008283&permissions=2147486720&scope=bot&permissions=2147486720&scope=messages.read%20bot](https://discord.com/oauth2/authorize?client_id=1118629362368008283&permissions=2147486720&scope=bot&permissions=2147486720&scope=messages.read%20bot)
+  </Step>
+  <Step title="Choose to install to your account">
+    Instead of selecting a server from the dropdown, look for the **"Add to my apps"** or **"Install to your account"** option and select it.
+  </Step>
+  <Step title="Authorize the bot">
+    Click **Authorize** to complete the installation. No server permission is required for this flow.
+  </Step>
+</Steps>
+
+After completing user install, supported commands will be available to you in any Discord context — including DMs with friends, group DMs, and servers you visit — without the bot needing to be added to those servers.
+
+## After Adding
+
+Once the bot has been added, a few things happen automatically:
+
+- The bot's status shows as **Idle** with the activity **"Listening to your commands"**, set in `on_ready` via `discord.ActivityType.listening`.
+- Slash commands are registered with Discord and typically appear in the `/` menu immediately. In rare cases it can take a few minutes for Discord to propagate them to all clients.
+- Run `/ping` at any time to confirm the bot is online. The response includes both WebSocket latency and message round-trip latency.

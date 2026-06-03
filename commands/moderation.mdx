@@ -1,0 +1,197 @@
+---
+title: "Moderation Commands for Server Management"
+sidebarTitle: "Moderation"
+description: "Slash commands for server moderation: view ban lists, mute or deafen members, issue timeouts, and move users between voice channels."
+---
+
+Rawrbot's moderation commands give server staff and administrators tools for managing members and voice channels directly through slash commands. All moderation commands require a server (guild) context — they cannot be used in DMs or Group DMs unless otherwise noted. Responses are ephemeral where applicable so that moderation actions remain discreet.
+
+---
+
+## `/ban_list`
+
+**Description:** "Gives a list of banned users in the server and the reason"
+
+Fetches the current server's full ban list using Discord's `guild.bans()` endpoint and formats each entry with the banned user's global name and the reason recorded at the time of the ban. A note is appended to the output explaining that entries showing `"none"` as a username belong to accounts that have since been deleted from Discord.
+
+| Property | Value |
+|---|---|
+| Contexts | Server only |
+| Installs | Server install |
+
+If no users have been banned, Rawrbot sends a follow-up message indicating the ban list is empty.
+
+**Example output format:**
+
+```
+User: ExampleUser
+Reason: Spamming
+
+User: none
+Reason: Harassment
+
+ note: users titled "none" have since been deleted since they were banned.
+```
+
+---
+
+## `/mute`
+
+**Description:** "Mutes a user (Optionally for `time` seconds)"
+
+Server-mutes (or unmutes) a member currently in a specified voice channel. When a duration is provided and muting is enabled, Rawrbot automatically unmutes the user after the given number of seconds and edits the confirmation message to reflect the unmute. Set `time` to `0` for a permanent mute that requires a manual unmute.
+
+<Note>
+  All responses from `/mute` are ephemeral — only the person who ran the command can see the confirmation.
+</Note>
+
+| Property | Value |
+|---|---|
+| Contexts | Server only |
+| Installs | Server install |
+
+**Parameters:**
+
+<ParamField path="voice_channel" type="VoiceChannel" required>
+  The voice channel that contains the user you want to mute or unmute. The user must currently be present in this channel.
+</ParamField>
+
+<ParamField path="user" type="Member" required>
+  The server member to mute or unmute.
+</ParamField>
+
+<ParamField path="mute" type="bool" required>
+  Pass `True` to apply a server mute, or `False` to remove it.
+</ParamField>
+
+<ParamField path="time" type="int" default="5">
+  Duration in seconds before the user is automatically unmuted. Set to `0` to mute indefinitely. This parameter is only used when `mute` is `True`.
+</ParamField>
+
+---
+
+## `/deafen`
+
+**Description:** "Deafens a user (Optionally for `time` seconds)"
+
+Server-deafens (or undeafens) a member currently in a specified voice channel. Mirrors the same timed behaviour as `/mute` — when `time` is non-zero and deafening is applied, Rawrbot automatically lifts the deafen after the given duration and updates the confirmation message.
+
+<Note>
+  All responses from `/deafen` are ephemeral — only the person who ran the command can see the confirmation.
+</Note>
+
+| Property | Value |
+|---|---|
+| Contexts | Server only |
+| Installs | Server install |
+
+**Parameters:**
+
+<ParamField path="voice_channel" type="VoiceChannel" required>
+  The voice channel that contains the user you want to deafen or undeafen. The user must currently be present in this channel.
+</ParamField>
+
+<ParamField path="user" type="Member" required>
+  The server member to deafen or undeafen.
+</ParamField>
+
+<ParamField path="deafen" type="bool" required>
+  Pass `True` to apply a server deafen, or `False` to remove it.
+</ParamField>
+
+<ParamField path="time" type="int" default="5">
+  Duration in seconds before the user is automatically undeafened. Set to `0` to deafen indefinitely. This parameter is only used when `deafen` is `True`.
+</ParamField>
+
+---
+
+## `/timeout`
+
+**Description:** "Times out a user for `duration` seconds"
+
+Places a Discord timeout on a server member for the specified duration. While timed out, the affected user cannot send messages, react, or join voice channels until the timeout expires. The response is always ephemeral.
+
+<Warning>
+  This command is restricted to the **bot owner** (hardcoded user ID). Any other user who attempts to run it will receive a permission error and the timeout will not be applied.
+</Warning>
+
+| Property | Value |
+|---|---|
+| Contexts | Server only |
+| Installs | Server install |
+
+**Parameters:**
+
+<ParamField path="user" type="Member" required>
+  The server member to apply the timeout to.
+</ParamField>
+
+<ParamField path="duration" type="int" default="60">
+  Length of the timeout in seconds. Must be between `1` and `2419200` (28 days). Defaults to 60 seconds if not specified.
+</ParamField>
+
+---
+
+## `/move_user`
+
+**Description:** "Moves a user from one VC to another"
+
+Moves a single server member from their current voice channel to a target voice channel. The command checks that the user is actually in a voice channel before attempting the move and confirms if they are already in the target channel. All feedback is sent ephemerally.
+
+| Property | Value |
+|---|---|
+| Contexts | Server only |
+| Installs | Server install |
+
+**Parameters:**
+
+<ParamField path="user" type="Member" required>
+  The server member to move. They must currently be connected to a voice channel.
+</ParamField>
+
+<ParamField path="voice_channel" type="VoiceChannel" required>
+  The destination voice channel to move the user to.
+</ParamField>
+
+**Error cases:**
+- If the user is not in any voice channel, Rawrbot responds: `"@user is not in a voice channel"`.
+- If the user is already in the target channel, Rawrbot responds: `"@user is already in #channel"`.
+
+---
+
+## `/move_voicechannel`
+
+**Description:** "Moves all users in a voice channel to another"
+
+Bulk-moves every member currently in a source voice channel to a destination voice channel. Useful for migrating a group of users between rooms mid-session. Optionally, the command can mention every user being moved in the response and can temporarily lock the source channel to prevent new members from joining while the move is in progress.
+
+<Note>
+  If more than 20 users are being moved, Rawrbot will first send a "Moving users, please wait" message before completing the operation. All responses are ephemeral.
+</Note>
+
+| Property | Value |
+|---|---|
+| Contexts | Server only |
+| Installs | Server install |
+
+**Parameters:**
+
+<ParamField path="voice_channel" type="VoiceChannel" required>
+  The source voice channel. All members currently in this channel will be moved. The channel must not be empty and must be different from the destination.
+</ParamField>
+
+<ParamField path="new_channel" type="VoiceChannel" required>
+  The destination voice channel that all members will be moved to.
+</ParamField>
+
+<ParamField path="list_users" type="bool" default="False">
+  When set to `True`, Rawrbot sends an additional ephemeral message mentioning every user who was moved.
+</ParamField>
+
+<ParamField path="lock_channel" type="bool" default="False">
+  When set to `True`, Rawrbot temporarily removes the Connect permission for `@everyone` on the source channel before moving members, preventing anyone from joining the source channel during the operation.
+</ParamField>
+
+**Error cases:**
+- If `voice_channel` and `new_channel` are the same, the command aborts: `"The voice channels are the same"`.
+- If the source channel has no members, the command aborts: `"The voice channel is empty"`.

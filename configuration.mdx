@@ -1,0 +1,82 @@
+---
+title: "Configure Discord Rawrbot with config.json"
+sidebarTitle: "Configuration"
+description: "Rawrbot reads all credentials and secrets from a config.json file at startup. Learn each field, where to get values, and which are required."
+---
+
+Rawrbot loads its configuration from a `config.json` file at startup using Python's built-in `json` module. The file is read synchronously before the bot connects to Discord, so any missing or malformed fields will prevent the bot from starting. Place `config.json` in the **project root** alongside `main.py`. A ready-to-fill template called `config_EXAMPLE.json` is included in the repository to get you started quickly.
+
+## Configuration File Structure
+
+The complete `config.json` file uses the following structure:
+
+```json config.json
+{
+  "token": "YOUR_BOT_TOKEN_HERE",
+  "spotify": {
+    "spotifyClientID": "YOUR_SPOTIFY_CLIENT_ID",
+    "spotifyClientSecret": "YOUR_SPOTIFY_CLIENT_SECRET"
+  },
+  "webhook": "YOUR_DISCORD_WEBHOOK_URL"
+}
+```
+
+Copy `config_EXAMPLE.json` to `config.json` and replace the placeholder values with your real credentials before running the bot.
+
+## Field Reference
+
+<ParamField body="token" type="string" required>
+  Your Discord bot token. This value authenticates the bot with the Discord Gateway and is required for the bot to start. Obtain it from the [Discord Developer Portal](https://discord.com/developers/applications) under your application's **Bot** tab. The bot will raise an error and refuse to connect if this field is missing or invalid.
+</ParamField>
+
+<ParamField body="spotify.spotifyClientID" type="string">
+  The Client ID for your Spotify application. This is used by the `/searchspotify` command to authenticate with the Spotify Web API and search for tracks. Only required if you intend to use the Spotify search functionality. Obtain it from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+</ParamField>
+
+<ParamField body="spotify.spotifyClientSecret" type="string">
+  The Client Secret for your Spotify application. Used alongside `spotifyClientID` to obtain an access token from Spotify's OAuth endpoint. Only required for `/searchspotify`. Obtain it from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) under your app's settings.
+</ParamField>
+
+<ParamField body="webhook" type="string">
+  A Discord webhook URL. Used by the `/upload` command when invoked in channel ID `1278161126860787837` to re-post uploaded files via webhook — this allows the message to appear with the invoking user's display name and avatar rather than the bot's identity. Only required if you are running the bot in that specific channel configuration.
+</ParamField>
+
+## Getting a Discord Bot Token
+
+<Steps>
+  <Step title="Open the Discord Developer Portal">
+    Navigate to [https://discord.com/developers/applications](https://discord.com/developers/applications) and sign in with your Discord account.
+  </Step>
+
+  <Step title="Create a new application">
+    Click **New Application** in the top-right corner, give your application a name (e.g. `Rawrbot`), agree to the Developer Terms of Service, and click **Create**.
+  </Step>
+
+  <Step title="Generate and copy your bot token">
+    In the left sidebar, select **Bot**. Under the **Token** section, click **Reset Token** and confirm. Copy the token that appears — this is your `token` value for `config.json`. Store it somewhere safe immediately, as Discord will not show it again without another reset.
+  </Step>
+
+  <Step title="Enable the Message Content Intent">
+    Still on the **Bot** page, scroll down to **Privileged Gateway Intents** and toggle on **Message Content Intent**. Rawrbot sets `intents.message_content = True` in `main.py`, so this intent must be enabled in the portal or the bot will encounter intent errors at startup.
+  </Step>
+</Steps>
+
+## Getting Spotify Credentials
+
+<Steps>
+  <Step title="Open the Spotify Developer Dashboard">
+    Go to [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) and log in with your Spotify account.
+  </Step>
+
+  <Step title="Create a new app">
+    Click **Create app**, fill in a name and description, and set a Redirect URI. Any valid URI works here (e.g. `http://localhost`) since Rawrbot uses the Client Credentials flow and does not require user authorisation redirects. Accept the terms and click **Save**.
+  </Step>
+
+  <Step title="Copy your credentials">
+    Open your newly created app and navigate to **Settings**. Your **Client ID** is displayed directly on the page. Click **View client secret** to reveal your **Client Secret**. Copy both values into the `spotify` object in your `config.json`.
+  </Step>
+</Steps>
+
+<Warning>
+  Keep your `config.json` secret at all times. Your bot token grants complete control over the bot's Discord account — anyone who obtains it can send messages, join servers, and perform any action the bot is capable of. Never share your token, never paste it in a public channel, and never commit `config.json` to a public repository. If your token is ever exposed, immediately reset it in the Discord Developer Portal.
+</Warning>

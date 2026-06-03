@@ -1,0 +1,138 @@
+---
+title: "Music Link Commands: Cross-Platform Song Sharing"
+sidebarTitle: "Music"
+description: "Convert song links between 20+ streaming platforms and search Spotify by song name using the song.link API and Spotify Web API."
+---
+
+Rawrbot's music commands make it easy to share songs with friends regardless of which streaming service they use. They are powered by [song.link](https://song.link) (also known as Odesli), a service that resolves a track from one platform and maps it to equivalent listings on over 20 other platforms. Whether you receive a Spotify link and need it on Apple Music, or you only know a song name and want the Tidal URL, these two commands cover both workflows.
+
+**Supported platforms:**
+
+| Platform | Enum value |
+|---|---|
+| All platforms (song.link page) | `all` |
+| Amazon Music | `amazonMusic` |
+| Amazon Store | `amazonStore` |
+| Anghami | `anghami` |
+| Apple Music | `appleMusic` |
+| Audiomack | `audiomack` |
+| Audius | `audius` |
+| Boomplay | `boomplay` |
+| Deezer | `deezer` |
+| Google | `google` |
+| Google Store | `googleStore` |
+| iTunes | `itunes` |
+| Napster | `napster` |
+| Pandora | `pandora` |
+| SoundCloud | `soundcloud` |
+| Spinrilla | `spinrilla` |
+| Spotify | `spotify` |
+| Tidal | `tidal` |
+| Yandex | `yandex` |
+| YouTube | `youtube` |
+| YouTube Music | `youtubeMusic` |
+
+---
+
+## `/convertsonglink`
+
+**Description:** "Using song.link API, convert a song from one platform to another. `all` if a platform is not found"
+
+Takes a direct streaming link for any track and returns the equivalent link on your chosen target platform by calling the [song.link API](https://odesli.co). If you select `all`, you receive the song.link aggregation page listing every available platform in one place. If the target platform doesn't have a listing for that track, the command automatically falls back to the `all` page instead of returning an error.
+
+For Apple Music results, a special **"Open in Apple Music App"** button is included in the response. This button redirects through the developer's GitHub Pages site (`flyingbacen.github.io`) to launch the Apple Music native app — working around Discord's restriction that only `https://` and `discord://` link schemes are allowed on buttons.
+
+| Property | Value |
+|---|---|
+| Contexts | Guilds, DMs, Group DMs |
+| Installs | Server install, User install |
+
+**Parameters:**
+
+<ParamField path="link" type="string" required>
+  The full URL of the song on any supported streaming platform (e.g. a Spotify track URL, Apple Music link, YouTube Music link, etc.).
+</ParamField>
+
+<ParamField path="converttoplatform" type="enum (musicStreamingServices)" required>
+  The target streaming platform to convert the link to. Select `all` to get the song.link page with links for every available platform. See the platform table above for all valid options.
+</ParamField>
+
+<ParamField path="issingle" type="bool" default="False">
+  Set to `True` if the track is the only song on its album (i.e. it is a single). This hint is passed to the song.link API to improve resolution accuracy.
+</ParamField>
+
+**Error cases:**
+
+- **Invalid link / profile URL:** song.link cannot resolve artist profile pages or malformed URLs. Rawrbot responds ephemerally with `"Invalid link. Profile links are not supported by song.link."` or a similar message depending on the error code returned by the API.
+- **Platform unavailable:** If the resolved track has no listing for the requested platform, Rawrbot falls back and returns the `all` page URL instead.
+
+**Example response (Spotify target):**
+
+```
+*Never Gonna Give You Up* by Rick Astley:
+https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8
+```
+
+---
+
+## `/searchspotify`
+
+**Description:** "Searches Spotify for a song and gives it for the wanted platform. If not Spotify, uses song.link API"
+
+Searches Spotify by song name and artist, then delivers a link for any of the 20+ supported platforms. Under the hood, the command performs a Spotify API search query (`{songname} artist:{songartist}`) to find the track, then — unless the target is Spotify itself — passes the Spotify track ID to the song.link API to resolve links for the requested platform.
+
+This is useful when you know the song title and artist but don't already have a link to paste into `/convertsonglink`.
+
+| Property | Value |
+|---|---|
+| Contexts | Guilds, DMs, Group DMs |
+| Installs | Server install, User install |
+
+**Parameters:**
+
+<ParamField path="songname" type="string" required>
+  The name of the song to search for on Spotify.
+</ParamField>
+
+<ParamField path="songartist" type="string" required>
+  The artist name used to narrow the Spotify search. Combined with `songname`, the query sent to Spotify is `{songname} artist:{songartist}`.
+</ParamField>
+
+<ParamField path="converttoplatform" type="enum (musicStreamingServices)" required>
+  The target streaming platform for the returned link. If `spotify` is selected, the Spotify link is returned directly without an additional song.link API call. For all other platforms, the song.link API is used to resolve the link. See the platform table at the top of this page for all valid options.
+</ParamField>
+
+**How it works:**
+
+1. Rawrbot obtains a short-lived Spotify access token using the [Client Credentials flow](https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow).
+2. It queries `https://api.spotify.com/v1/search` with `type=track&limit=1` to find the best match.
+3. If `converttoplatform` is `spotify`, the Spotify track URL is returned immediately.
+4. Otherwise, the Spotify track ID is sent to the song.link API (`/v1-alpha.1/links?platform=spotify&type=song&id={id}`) and the result for the requested platform is returned.
+
+<Note>
+  `/searchspotify` requires valid Spotify API credentials configured in `config.json` under the `spotify` key:
+
+  ```json
+  {
+    "spotify": {
+      "spotifyClientID": "your_client_id_here",
+      "spotifyClientSecret": "your_client_secret_here"
+    }
+  }
+  ```
+
+  You can obtain these from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+</Note>
+
+**Error cases:**
+
+- **Song not found:** If Spotify returns no results for the given name and artist combination, Rawrbot responds ephemerally with `"Could not find the song on Spotify via search."`.
+- **Platform unavailable:** Same fallback as `/convertsonglink` — if the resolved track has no listing for the requested platform, the song.link aggregation page is returned instead.
+
+**Example response (Apple Music target):**
+
+```
+*Blinding Lights* by The Weeknd:
+https://music.apple.com/us/album/blinding-lights/...
+[Open in Apple Music App 🎵]
+```

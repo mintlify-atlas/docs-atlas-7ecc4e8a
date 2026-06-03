@@ -1,47 +1,93 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get Started with Discord Rawrbot"
+sidebarTitle: "Quickstart"
+description: "Set up and run Discord Rawrbot locally in minutes — clone the repo, install dependencies, add your config, and launch the bot."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+You can get Rawrbot running locally with Python 3.10+ and a Discord bot token in just a few steps. The entire setup — from cloning the repository to seeing the bot come online — takes under five minutes once you have your credentials ready.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Clone the repository">
+    Clone the Rawrbot repository from GitHub and change into the project directory:
 
     ```bash
-    npm install your-package
+    git clone https://github.com/Flyingbacen/Discord-rawrbot.git && cd Discord-rawrbot
     ```
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+
+  <Step title="Install dependencies">
+    Install all required Python packages using pip:
 
     ```bash
-    your-cli init
+    pip install -r requirements.txt
     ```
+
+    This installs the three direct dependencies:
+    - **`discord.py`** — the Discord API library and `app_commands` framework
+    - **`aiohttp`** — async HTTP client for external API requests
+    - **`translate`** — translation library used by the `/translate` command
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+
+  <Step title="Create your config file">
+    Copy `config_EXAMPLE.json` to `config.json` in the project root and fill in your credentials:
 
     ```bash
-    your-cli start
+    cp config_EXAMPLE.json config.json
     ```
+
+    Edit `config.json` to match the following structure:
+
+    ```json
+    {
+      "token": "YOUR_BOT_TOKEN_HERE",
+      "spotify": {
+        "spotifyClientID": "YOUR_SPOTIFY_CLIENT_ID",
+        "spotifyClientSecret": "YOUR_SPOTIFY_CLIENT_SECRET"
+      },
+      "webhook": "YOUR_DISCORD_WEBHOOK_URL"
+    }
+    ```
+
+    - The **`token`** field is the only value required to start the bot.
+    - The **`spotify`** credentials are only needed if you want the `/searchspotify` command to function.
+    - The **`webhook`** URL is only needed for the `/upload` command when invoked in its configured channel.
+
+    See the [Configuration](/configuration) page for full details on obtaining each value.
+  </Step>
+
+  <Step title="Run the bot">
+    Start Rawrbot with:
+
+    ```bash
+    python main.py
+    ```
+
+    On a successful launch you will see the following printed to the console:
+
+    ```
+    Ready!
+    ```
+
+    The bot is now online, has loaded all four cogs (`general`, `moderation`, `music`, `utility`), and is listening for slash commands.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+<Note>
+  The bot is initialised with a command prefix of `!` in `main.py`, but this prefix is intentionally unused. All user-facing interactions are Discord slash commands registered through `app_commands`.
+</Note>
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+<Warning>
+  Never commit your `config.json` to version control — it contains your bot token, which grants full control of the bot account. The repository includes a `.gitignore`; make sure `config.json` is covered by it before making any commits.
+</Warning>
+
+## Verifying the Bot is Online
+
+Once you see `Ready!` in the console, switch to Discord and confirm the bot is working:
+
+1. The bot will appear in your server's member list with an **idle** status and a **"Listening to your commands"** activity — both set in the `on_ready` event handler.
+2. Open any channel the bot has access to and type `/ping`. If Rawrbot responds with a `Pong!` message showing its latency in milliseconds, the setup is complete and all systems are operational.
+
+If the bot does not appear online or `/ping` returns no response, double-check that:
+- Your `config.json` contains a valid bot token.
+- The bot has been invited to your server with the correct permissions.
+- The **Message Content Intent** is enabled in the Discord Developer Portal under your bot's settings.
