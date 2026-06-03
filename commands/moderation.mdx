@@ -1,10 +1,10 @@
 ---
-title: "Moderation Commands for Server Management"
+title: "Rawrbot Moderation Commands for Discord Server Management"
 sidebarTitle: "Moderation"
-description: "Slash commands for server moderation: view ban lists, mute or deafen members, issue timeouts, and move users between voice channels."
+description: "Rawrbot moderation commands: view ban lists, mute or deafen voice members, issue Discord timeouts, and bulk-move users between voice channels."
 ---
 
-Rawrbot's moderation commands give server staff and administrators tools for managing members and voice channels directly through slash commands. All moderation commands require a server (guild) context — they cannot be used in DMs or Group DMs unless otherwise noted. Responses are ephemeral where applicable so that moderation actions remain discreet.
+Rawrbot's moderation commands give server staff and administrators tools for managing members and voice channels directly through slash commands. Nearly all moderation commands require a server (guild) context — they cannot be used in DMs or Group DMs unless otherwise noted. Responses are ephemeral where applicable so that moderation actions remain discreet.
 
 ---
 
@@ -169,10 +169,14 @@ Bulk-moves every member currently in a source voice channel to a destination voi
   If more than 20 users are being moved, Rawrbot will first send a "Moving users, please wait" message before completing the operation. All responses are ephemeral.
 </Note>
 
+<Note>
+  Although `/move_voicechannel` is available in all contexts (guilds, DMs, Group DMs) via `allowed_contexts(True, True, True)`, it uses `allowed_installs(True, False)` — meaning it is only available as a **server install**. It cannot be invoked via a user-installed instance of Rawrbot.
+</Note>
+
 | Property | Value |
 |---|---|
-| Contexts | Server only |
-| Installs | Server install |
+| Contexts | Guilds, DMs, Group DMs |
+| Installs | Server install only |
 
 **Parameters:**
 

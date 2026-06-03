@@ -1,7 +1,7 @@
 ---
-title: "Discord Rawrbot: Your Community Bot"
+title: "Discord Rawrbot: discord.py Slash Command Bot Guide"
 sidebarTitle: "Introduction"
-description: "Discord Rawrbot is a feature-rich Discord bot built with discord.py, offering slash commands for moderation, music, translation, and server utilities."
+description: "Discord Rawrbot is a community Discord bot built with discord.py, offering slash commands for moderation, music, translation, and server utilities."
 ---
 
 Discord Rawrbot is a community-focused Discord bot built with [discord.py](https://discordpy.readthedocs.io/) and its `app_commands` framework, meaning every user-facing interaction is a native Discord slash command. The bot supports both server installs and user installs — when added to a user account it continues to work in DMs and group DMs, giving your community a consistent experience no matter where they chat.
@@ -14,7 +14,7 @@ Rawrbot follows discord.py's **cog-based architecture**, splitting commands and 
 |---|---|---|
 | General | `cogs.general` | Core utility commands — ping, greetings, invite, sync |
 | Moderation | `cogs.moderation` | Server moderation tools |
-| Music | `cogs.music` | Music playback and Spotify integration |
+| Music | `cogs.music` | Spotify search and song.link cross-platform link conversion |
 | Utility | `cogs.utility` | Translation, upload, and miscellaneous helpers |
 
 The bot is initialised with `command_prefix="!"`, but this prefix is intentionally unused — all commands are registered and invoked as Discord slash commands through `app_commands`. The `Message Content` privileged intent is enabled so the bot can read message content where needed.
@@ -31,7 +31,7 @@ Each cog exposes its own set of slash commands. Browse the dedicated reference p
     Server moderation utilities including member management tools for keeping your community safe.
   </Card>
   <Card title="Music Commands" icon="music" href="/commands/music">
-    Music playback powered by yt-dlp, Spotify search via the Spotify Web API, and song.link cross-platform sharing.
+    Spotify song search via the Spotify Web API and cross-platform song link conversion powered by the song.link API.
   </Card>
   <Card title="Utility Commands" icon="wrench" href="/commands/utility">
     Translation powered by the `translate` library, file uploads via catbox.moe, and other general-purpose helpers.
@@ -58,7 +58,7 @@ Rawrbot's Python dependencies are minimal. Install them with `pip install -r req
 
 **Optional external tools** (must be available on your system `PATH`):
 
-- **`yt-dlp`** — required for music playback and the `/upload` command's download functionality
+- **`yt-dlp`** — required by the `/upload` command to download videos before re-hosting them
 - **`ffprobe`** — required alongside yt-dlp for audio stream probing
 
 **External API integrations:**

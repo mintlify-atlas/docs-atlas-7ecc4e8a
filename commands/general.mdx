@@ -1,7 +1,7 @@
 ---
-title: "General Commands Reference"
+title: "Rawrbot General Commands: Ping, Hello, Invite & More"
 sidebarTitle: "General"
-description: "General-purpose slash commands in Rawrbot including ping, hello, invite, pop, and the owner-only sync command."
+description: "General-purpose slash commands in Rawrbot: check latency, greet users, generate an invite link, enjoy /pop, and sync the command tree as the bot owner."
 ---
 
 Rawrbot's general commands cover everyday interactions — from checking the bot's latency to inviting it to a new server. Most of these commands are available everywhere Discord allows slash commands, including servers, DMs, and Group DMs, and they support both server and user installs.
@@ -54,9 +54,13 @@ Hello Salem! I hope you're doing good :)
 
 ## `/invite`
 
-**Description:** "invite the bot to your server!"
+**Description:** "invite the bot to your server! (perms are not properly set up for this version of the bot)"
 
 Sends an OAuth2 invite link so you (or someone else) can add Rawrbot to a server. When the command is used, Rawrbot also logs the channel and context information to the console for the bot owner's reference.
+
+<Note>
+  The invite link is hardcoded in the source. Note that permissions are not fully configured for the current version of the bot — review the linked scopes and permissions before deploying in a production server.
+</Note>
 
 | Property | Value |
 |---|---|
@@ -73,7 +77,7 @@ Sends an OAuth2 invite link so you (or someone else) can add Rawrbot to a server
 
 **Description:** "goes the weasel!"
 
-A lighthearted fun command. In a server, Rawrbot sends a short message with a pop fact. In a DM or Group DM (where there's no guild context), it appends a hidden spoiler tag containing a cheeky follow-up line — revealed only if you click to unblur it.
+A lighthearted fun command. In a server, Rawrbot sends a short message with a pop fact. In a DM or Group DM (where `interaction.guild` is `None`), it appends a hidden spoiler tag containing a cheeky follow-up line — revealed only if you click to unblur it.
 
 | Property | Value |
 |---|---|
@@ -106,14 +110,14 @@ Synchronises Rawrbot's slash command tree with Discord's API, making any newly r
 
 | Property | Value |
 |---|---|
-| Contexts | User install only (not available in guilds) |
+| Contexts | Guilds, DMs, Group DMs |
 | Installs | User install only |
 | Parameters | None |
+
+<Warning>
+  This command is **user-install only** (`allowed_installs(False, True)`). It cannot be added as a server-installed bot command — it is only available when Rawrbot is installed to a user account. Despite being available in all contexts (guilds, DMs, Group DMs) once user-installed, it is **owner-only**: only the hardcoded owner user ID may actually perform the sync.
+</Warning>
 
 **Behavior:**
 - If the calling user's ID matches the hardcoded owner ID, the command tree is synced and the confirmation message is automatically deleted after 10 seconds.
 - If any other user runs the command, Rawrbot responds with `"Missing perms"` and deletes that response after 5 seconds.
-
-<Warning>
-  This command is **owner-only**. The allowed user ID is hardcoded in the source. Any other user who invokes `/sync` will receive a "Missing perms" response — the sync will not be performed.
-</Warning>

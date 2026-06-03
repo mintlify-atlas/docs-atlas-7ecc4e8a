@@ -1,7 +1,7 @@
 ---
-title: "Utility Commands: Translate, Images, and Uploads"
+title: "Rawrbot Utility Commands: Translate, Images, Uploads"
 sidebarTitle: "Utility"
-description: "Utility slash commands in Rawrbot: translate text across 25+ languages, find random images in a server, and upload videos to catbox.moe."
+description: "Rawrbot utility commands: translate text in 25 languages via the translate library, find a random server image, and upload videos via yt-dlp to catbox.moe."
 ---
 
 Rawrbot's utility commands handle a range of practical tasks — translating text between languages, digging up a random image from a server's history, and downloading and re-hosting videos from sites like YouTube, TikTok, and more. These commands are independent of each other and can be used in most contexts where Rawrbot is available.
@@ -12,7 +12,11 @@ Rawrbot's utility commands handle a range of practical tasks — translating tex
 
 **Description:** "Translate text from one language to another"
 
-Translates a piece of text between any two of the 25 supported languages using the `translate` Python library. Both the source and target language fields have autocomplete enabled in Discord, so you can start typing a language name and select it from the dropdown rather than entering a language code manually. The result can optionally be sent as an ephemeral reply visible only to you.
+Translates a piece of text between any two of the 25 supported languages using the [`translate`](https://pypi.org/project/translate/) Python library. Both the source and target language fields have autocomplete enabled in Discord, so you can start typing a language name and select it from the dropdown rather than entering a language code manually. The result can optionally be sent as an ephemeral reply visible only to you.
+
+<Note>
+  Translation is performed by the `translate` Python library — not an external API such as Google Translate or DeepL. Translation quality depends on the library's underlying provider.
+</Note>
 
 | Property | Value |
 |---|---|
@@ -98,6 +102,10 @@ Downloads a video from any [yt-dlp](https://github.com/yt-dlp/yt-dlp)-supported 
   The command also requires `yt-dlp` and `ffprobe` to be installed and accessible on the host system.
 </Warning>
 
+<Warning>
+  The `ffprobe` executable is referenced as a **hardcoded Windows path**: `c:/windows/ffprobe.exe`. This means `/upload` is only functional when Rawrbot is hosted on a Windows machine with `ffprobe` installed at that exact location. It will fail on Linux, macOS, or any Windows system where `ffprobe` is installed elsewhere.
+</Warning>
+
 | Property | Value |
 |---|---|
 | Contexts | Guilds, DMs, Group DMs |
@@ -109,8 +117,8 @@ Downloads a video from any [yt-dlp](https://github.com/yt-dlp/yt-dlp)-supported 
   The URL of the video to download. Any site supported by `yt-dlp` is accepted. The bot owner may also provide a local file path (e.g. starting with `C:` or `D:`) to upload a file already on the host machine.
 </ParamField>
 
-<ParamField path="optional_message" type="string">
-  An optional text message to include alongside the uploaded file or catbox.moe link in the final response.
+<ParamField path="optional_message" type="string" default='""'>
+  An optional text message to include alongside the uploaded file or catbox.moe link in the final response. Defaults to an empty string.
 </ParamField>
 
 **Upload size rules:**

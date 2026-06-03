@@ -1,5 +1,5 @@
 ---
-title: "Bot Permissions and Command Access Control"
+title: "Discord Rawrbot Permissions and Command Access Guide"
 sidebarTitle: "Permissions"
 description: "Understand what Discord permissions Rawrbot needs, which commands are owner-only, and how server vs user install affects command availability."
 ---
@@ -32,7 +32,7 @@ Some commands are restricted to specific Discord user IDs that are hardcoded dir
 - **`/upload`** — checks `interaction.user.id` at runtime; users who are not the owner are redirected to use `/random_image` instead.
 
 <Warning>
-  The owner user ID (`717471432816459840`) is hardcoded in `cogs/general.py` and `cogs/moderation.py`. If you are self-hosting Rawrbot, you must update these values to your own Discord user ID before running the bot. See the [Self-Hosting](/guides/self-hosting) guide for instructions on finding your user ID.
+  The owner user ID (`717471432816459840`) is hardcoded in `cogs/general.py`, `cogs/moderation.py`, and `cogs/utility.py`. If you are self-hosting Rawrbot, you must update these values to your own Discord user ID before running the bot. See the [Self-Hosting](/guides/self-hosting) guide for instructions on finding your user ID.
 </Warning>
 
 ## Command Contexts and Install Types
@@ -50,7 +50,7 @@ The table below shows the effective availability for every command based on the 
 | `/hello` | ✓ | ✓ | ✓ | Server & User |
 | `/invite` | ✓ | ✓ | ✓ | Server & User |
 | `/pop` | ✓ | ✓ | ✓ | Server & User |
-| `/sync` | ✗ | ✓ | ✗ | User only |
+| `/sync` | ✓ | ✓ | ✓ | User only |
 | `/ban_list` | ✓ | ✗ | ✗ | Server only |
 | `/mute` | ✓ | ✗ | ✗ | Server only |
 | `/deafen` | ✓ | ✗ | ✗ | Server only |
@@ -63,7 +63,7 @@ The table below shows the effective availability for every command based on the 
 | `/random_image` | ✓ | ✗ | ✗ | Server only |
 | `/upload` | ✓ | ✓ | ✓ | Server & User |
 
-Note that `/sync` is unique: it is available in DMs but restricted to user install only (`allowed_installs(False, True)`). This means it can only be invoked by a user who has installed the bot to their account — it is intentionally not exposed as a guild command to avoid accidental syncs from server members.
+Note that `/sync` is unique: its contexts are set to `allowed_contexts(True, True, True)`, so it is technically usable in guilds, DMs, and group DMs, but it is restricted to user install only (`allowed_installs(False, True)`). This means it can only be invoked by a user who has installed the bot to their account — it is intentionally not registered as a guild bot command to avoid accidental syncs from server members.
 
 ## Ephemeral Responses
 

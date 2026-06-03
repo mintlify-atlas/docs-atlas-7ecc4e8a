@@ -1,19 +1,19 @@
 ---
-title: "Self-Host Discord Rawrbot on Your Machine"
+title: "Self-Host Discord Rawrbot: Setup and Configuration"
 sidebarTitle: "Self-Hosting"
 description: "Run your own instance of Discord Rawrbot. Covers prerequisites, cloning, dependency installation, configuration, and running the bot process."
 ---
 
-Self-hosting Rawrbot lets you run your own instance with your own bot token, giving you full control over the bot and its configuration. You'll need Python 3.10 or newer, a Discord bot application created through the Discord Developer Portal, and optionally Spotify API credentials if you want to use the Spotify-related commands.
+Self-hosting Rawrbot lets you run your own instance with your own bot token, giving you full control over the bot and its configuration. You'll need Python 3.12 or newer, a Discord bot application created through the Discord Developer Portal, and optionally Spotify API credentials if you want to use the Spotify-related commands.
 
 ## Prerequisites
 
 Before you start, make sure you have the following:
 
-- **Python 3.10 or newer** — the codebase uses f-strings and type hint syntax that require at least Python 3.10. Some expressions in `cogs/moderation.py` (such as `f"{"" if ... else "s"}"`) use nested f-string syntax that requires Python 3.12 or newer.
+- **Python 3.12 or newer** — `cogs/moderation.py` uses nested f-string syntax (such as `f"{"" if ... else "s"}"`) that was introduced in Python 3.12. Earlier versions will fail to parse the file at import time.
 - **A Discord account** with access to the [Discord Developer Portal](https://discord.com/developers/applications), where you will create a bot application and obtain a token.
 - **Git** — for cloning the repository from GitHub.
-- **`yt-dlp` and `ffprobe`** — only required if you intend to use the `/upload` command. These are not listed in `requirements.txt` and must be installed separately on your system.
+- **`yt-dlp` and `ffprobe`** — only required if you intend to use the `/upload` command. These are not listed in `requirements.txt` and must be installed separately on your system. Note that the `/upload` command hardcodes the ffprobe path as `c:/windows/ffprobe.exe`, making it Windows-specific in its current form.
 
 ## Installation
 
@@ -112,7 +112,7 @@ Running `python main.py` directly in a terminal works for development, but the b
 After the bot starts for the first time, its slash commands may not appear in Discord immediately. The `/sync` command calls `tree.sync()` to push all registered application commands to Discord's API. This command is owner-only — it checks `interaction.user.id` against the `allowedUsers` list in `cogs/general.py`.
 
 <Warning>
-  The owner user ID (`717471432816459840`) is hardcoded in both `cogs/general.py` (in `bigDict["sync"]["extras"]["allowedUsers"]`) and `cogs/moderation.py` (in the `/timeout` command handler). If you are self-hosting, you **must** replace these IDs with your own Discord user ID before running the bot, otherwise you will not be able to use owner-only commands.
+  The owner user ID (`717471432816459840`) is hardcoded in `cogs/general.py` (in `bigDict["sync"]["extras"]["allowedUsers"]`), `cogs/moderation.py` (in the `/timeout` command handler), and `cogs/utility.py` (in the `/upload` command handler). If you are self-hosting, you **must** replace these IDs with your own Discord user ID in all three files before running the bot, otherwise you will not be able to use owner-only commands.
 </Warning>
 
 To find your Discord user ID, enable **Developer Mode** in Discord's settings (**Advanced → Developer Mode**), then right-click your username anywhere in Discord and select **Copy User ID**.
